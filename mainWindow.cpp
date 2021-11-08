@@ -11,12 +11,13 @@
 #include <QPropertyAnimation>
 #include <QPalette>
 #include <string>
-
-using std::cout;
+#include <fstream>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    slFlag = 0; //0 indicates save/write
     currentSel = {"", "", ""};
     std::string s = "";
     for (int i = 0; i < 3; i++)
@@ -48,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent)
     flashB = new QPushButton("Flashing Lights", this);
     musictrafficB = new QPushButton("Music", this);
     musicbeatB = new QPushButton("Music To The Beat", this);
-    //QPushButton *solidB = new QPushButton("Solid Colours");
 
     patternButtons = new QVBoxLayout;
     patternButtons->addWidget(breathB);
@@ -65,6 +65,12 @@ MainWindow::MainWindow(QWidget *parent)
     states->addWidget(s1);
     states->addWidget(s2);
     states->addWidget(s3);
+
+    saveload = new QHBoxLayout;
+    save = new QPushButton("Save", this);
+    load = new QPushButton("Load", this);
+    saveload->addWidget(save);
+    saveload->addWidget(load);
 
     //so how are we going to do this one? will we just have a section on our controller thats going to say pick a solid colour and then have a bunch of buttons for solid colours
     //maybe we could create a widget on the main widget that has a bunch of colour buttons
@@ -91,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     controller = new QVBoxLayout;
     controller->addWidget(controllerLabel);
     controller->addWidget(current);
+    controller->addLayout(saveload);
     controller->addLayout(states);
     controller->addLayout(bright);
     controller->addLayout(patternButtons);
@@ -114,6 +121,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(blue, &QPushButton::released, this, &MainWindow::blueB);
     connect(green, &QPushButton::released, this, &MainWindow::greenB);
     connect(purple, &QPushButton::released, this, &MainWindow::purpleB);
+
+    connect(s1, &QPushButton::released, this, &MainWindow::s1B);
+    connect(s2, &QPushButton::released, this, &MainWindow::s2B);
+    connect(s3, &QPushButton::released, this, &MainWindow::s3B);
+
+    connect(save, &QPushButton::released, this, &MainWindow::saveB);
+    connect(load, &QPushButton::released, this, &MainWindow::loadB);
     //we would have to add more for the solid colours.
 
     //connect(solidB, &QPushButton::released, this, &MainWindow::solidColourButton);
@@ -121,18 +135,78 @@ MainWindow::MainWindow(QWidget *parent)
     connect(brightness, &QSlider::valueChanged, this, &MainWindow::adjustBrightness);
 }
 
+void MainWindow::refreshCurrentSel()
+{
+    std::string s = "";
+    for (int i = 0; i < 3; i++)
+    {
+        s += currentSel[i];
+        if (i != 2)
+        {
+            s += ", ";
+        }
+    }
+    current->setText(QString::fromStdString(s));
+}
+
+void MainWindow::useCurrentSel()
+{
+    //brightness
+    int val = std::stoi(currentSel[0]);
+    brightness->setValue(val);
+    //colour
+    if (currentSel[1] == "Red")
+    {
+        redB();
+    }
+    else if (currentSel[1] == "Blue")
+    {
+        blueB();
+    }
+    else if (currentSel[1] == "Green")
+    {
+        greenB();
+    }
+    else if (currentSel[1] == "Purple")
+    {
+        purpleB();
+    }
+    //mode
+    if (currentSel[2] == "Breath Lights")
+    {
+        breathButton();
+    }
+    else if (currentSel[2] == "Traffic Route Lights")
+    {
+        trafficButton();
+    }
+    else if (currentSel[2] == "Flashing Lights")
+    {
+        flashButton();
+    }
+    else if (currentSel[2] == "Music")
+    {
+        musicTrafficButton();
+    }
+    else if (currentSel[2] == "Music To The Beat")
+    {
+        musicBeatButton();
+    }
+}
+void MainWindow::saveB()
+{
+    slFlag = 0;
+}
+void MainWindow::loadB()
+{
+    slFlag = 1;
+}
 void MainWindow::breathButton()
 {
     QString temp = breathB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 void MainWindow::trafficButton()
@@ -140,13 +214,7 @@ void MainWindow::trafficButton()
     QString temp = trafficB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 void MainWindow::flashButton()
@@ -154,13 +222,7 @@ void MainWindow::flashButton()
     QString temp = flashB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 void MainWindow::musicTrafficButton()
@@ -168,13 +230,7 @@ void MainWindow::musicTrafficButton()
     QString temp = musictrafficB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 void MainWindow::musicBeatButton()
@@ -182,13 +238,7 @@ void MainWindow::musicBeatButton()
     QString temp = musicbeatB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 void MainWindow::redB()
@@ -196,73 +246,126 @@ void MainWindow::redB()
     QString temp = red->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 void MainWindow::blueB()
 {
     QString temp = blue->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 void MainWindow::greenB()
 {
     QString temp = green->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 void MainWindow::purpleB()
 {
     QString temp = purple->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
-    std::string s = "";
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
+//for load: getline and store in array/vector and then access the data structure
 void MainWindow::s1B()
 {
+    if (slFlag == 0)
+    {
+        std::ofstream fout("state1.txt");
+        for (int i = 0; i < 3; i++)
+        {
+            fout << currentSel[i];
+            if (i != 2)
+            {
+                fout << ",";
+            }
+        }
+        fout.close();
+    }
+    else if (slFlag == 1)
+    {
+        std::string line;
+        std::ifstream fin("state1.txt");
+        getline(fin, line);
+        for (int i = 0; i < 3; i++)
+        {
+            int split = line.find(",");
+            currentSel[i] = line.substr(0, split);
+            line = line.substr(split + 1);
+        }
+        refreshCurrentSel();
+        useCurrentSel();
+    }
 }
 void MainWindow::s2B()
 {
+    if (slFlag == 0)
+    {
+        std::ofstream fout("state2.txt");
+        for (int i = 0; i < 3; i++)
+        {
+            fout << currentSel[i];
+            if (i != 2)
+            {
+                fout << ",";
+            }
+        }
+        fout.close();
+    }
+    else if (slFlag == 1)
+    {
+        std::string line;
+        std::ifstream fin("state2.txt");
+        getline(fin, line);
+        for (int i = 0; i < 3; i++)
+        {
+            int split = line.find(",");
+            currentSel[i] = line.substr(0, split);
+            line = line.substr(split + 1);
+        }
+        refreshCurrentSel();
+        useCurrentSel();
+    }
 }
 void MainWindow::s3B()
 {
+    if (slFlag == 0)
+    {
+        std::ofstream fout("state3.txt");
+        for (int i = 0; i < 3; i++)
+        {
+            fout << currentSel[i];
+            if (i != 2)
+            {
+                fout << ",";
+            }
+        }
+        fout.close();
+    }
+    else if (slFlag == 1)
+    {
+        std::string line;
+        std::ifstream fin("state3.txt");
+        getline(fin, line);
+        for (int i = 0; i < 3; i++)
+        {
+            int split = line.find(",");
+            currentSel[i] = line.substr(0, split);
+            line = line.substr(split + 1);
+        }
+        refreshCurrentSel();
+        useCurrentSel();
+    }
 }
 void MainWindow::adjustBrightness()
 {
     int brightVal = brightness->value();
     std::string s = std::to_string(brightVal);
     currentSel[0] = s;
-    for (int i = 0; i < 3; i++)
-    {
-        s += currentSel[i];
-        s += ", ";
-    }
-    current->setText(QString::fromStdString(s));
+    refreshCurrentSel();
 }
 
 /*

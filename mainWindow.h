@@ -1,7 +1,5 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include <iostream>
-#include <vector>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -10,6 +8,8 @@
 #include <QSlider>
 #include <QHBoxLayout>
 #include <QTextEdit>
+#include <fstream>
+#include <iostream>
 
 using std::string;
 using std::vector;
@@ -44,9 +44,16 @@ private slots:
     void s1B();
     void s2B();
     void s3B();
+    void saveB();
+    void loadB();
     void adjustBrightness();
+    void refreshCurrentSel();
+    void useCurrentSel();
 
 private:
+    std::ofstream fout;
+    int slFlag;
+
     //to create widgets
     QWidget *widget;
 
@@ -65,8 +72,11 @@ private:
     QPushButton *s1;
     QPushButton *s2;
     QPushButton *s3;
+    QPushButton *save;
+    QPushButton *load;
 
     QHBoxLayout *colourButtons;
+    QHBoxLayout *saveload;
     QHBoxLayout *bright;
     QHBoxLayout *states;
     QVBoxLayout *controller;
