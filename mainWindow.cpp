@@ -17,7 +17,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    slFlag = 0; //0 indicates save/write
+    onOffFlag = 1; //1 indicates on
+    slFlag = 0;    //0 indicates save/write
     currentSel = {"", "", ""};
     std::string s = "";
     for (int i = 0; i < 3; i++)
@@ -66,6 +67,10 @@ MainWindow::MainWindow(QWidget *parent)
     states->addWidget(s2);
     states->addWidget(s3);
 
+    onOffL = new QHBoxLayout;
+    onoff = new QPushButton("On/Off", this);
+    onOffL->addWidget(onoff);
+
     saveload = new QHBoxLayout;
     save = new QPushButton("Save", this);
     load = new QPushButton("Load", this);
@@ -97,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
     controller = new QVBoxLayout;
     controller->addWidget(controllerLabel);
     controller->addWidget(current);
+    controller->addLayout(onOffL);
     controller->addLayout(saveload);
     controller->addLayout(states);
     controller->addLayout(bright);
@@ -128,9 +134,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(save, &QPushButton::released, this, &MainWindow::saveB);
     connect(load, &QPushButton::released, this, &MainWindow::loadB);
-    //we would have to add more for the solid colours.
-
-    //connect(solidB, &QPushButton::released, this, &MainWindow::solidColourButton);
 
     connect(brightness, &QSlider::valueChanged, this, &MainWindow::adjustBrightness);
 }
@@ -366,6 +369,19 @@ void MainWindow::adjustBrightness()
     std::string s = std::to_string(brightVal);
     currentSel[0] = s;
     refreshCurrentSel();
+}
+
+void MainWindow::onOffB()
+{
+    if (onOffFlag == 1)
+    {
+        onOffFlag = 0;
+        currentSel = {"", "", ""};
+    }
+    else
+    {
+        onOffFlag = 1;
+    }
 }
 
 /*

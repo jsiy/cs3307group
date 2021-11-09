@@ -49,10 +49,12 @@ private slots:
     void adjustBrightness();
     void refreshCurrentSel();
     void useCurrentSel();
+    void onOffB();
 
 private:
     std::ofstream fout;
     int slFlag;
+    int onOffFlag;
 
     //to create widgets
     QWidget *widget;
@@ -74,11 +76,13 @@ private:
     QPushButton *s3;
     QPushButton *save;
     QPushButton *load;
+    QPushButton *onoff;
 
     QHBoxLayout *colourButtons;
     QHBoxLayout *saveload;
     QHBoxLayout *bright;
     QHBoxLayout *states;
+    QHBoxLayout *onOffL;
     QVBoxLayout *controller;
     QBoxLayout *patternButtons;
 
