@@ -1,4 +1,12 @@
-
+// CS3307A
+// Group 14
+// Deliverable 2
+// Nov 9, 2021
+// Joseph Siy
+// Nada Elkelani
+// Patrick Mihalcea
+// Brian Cheng
+// Usman Khan
 #include "mainWindow.h"
 #include <QLabel>
 #include <QPushButton>
@@ -17,9 +25,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    onOffFlag = 1; //1 indicates on
-    slFlag = 0;    //0 indicates save/write
-    currentSel = {"", "", ""};
+    onOffFlag = 1; //1 indicates on, 0 indicates off
+    slFlag = 0;    //0 indicates save/write, 1 indicates load/read
+    currentSel = {"", "", ""}; //init currentSel to empty, populate it below
     std::string s = "";
     for (int i = 0; i < 3; i++)
     {
@@ -29,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent)
             s += ", ";
         }
     }
+
+    //setup ui
+
+    //setup currentSel display
     current = new QTextEdit(this);
     current->setText(QString::fromStdString(s));
     //lable the qt box so that the user knows its a light controller
@@ -44,7 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
     bright->addWidget(brightness);
 
     //creating the buttons:
-    //the following will be on the same widet board
+    
+    //mode buttons
     breathB = new QPushButton("Breath Lights", this);
     trafficB = new QPushButton("Traffic Route Lights", this);
     flashB = new QPushButton("Flashing Lights", this);
@@ -57,8 +70,8 @@ MainWindow::MainWindow(QWidget *parent)
     patternButtons->addWidget(flashB);
     patternButtons->addWidget(musictrafficB);
     patternButtons->addWidget(musicbeatB);
-    //patternButtons->addWidget(solidB);
 
+    //state buttons
     states = new QHBoxLayout;
     s1 = new QPushButton("State 1", this);
     s2 = new QPushButton("State 2", this);
@@ -67,30 +80,24 @@ MainWindow::MainWindow(QWidget *parent)
     states->addWidget(s2);
     states->addWidget(s3);
 
+    //on and off buttons
     onOffL = new QHBoxLayout;
     onoff = new QPushButton("On/Off", this);
     onOffL->addWidget(onoff);
 
+    //save and load buttons
     saveload = new QHBoxLayout;
     save = new QPushButton("Save", this);
     load = new QPushButton("Load", this);
     saveload->addWidget(save);
     saveload->addWidget(load);
 
-    //so how are we going to do this one? will we just have a section on our controller thats going to say pick a solid colour and then have a bunch of buttons for solid colours
-    //maybe we could create a widget on the main widget that has a bunch of colour buttons
-    //so instead of making one button called solidb like i have bellow:
-    //QPushButton *solidB = new QPushButton("Solid Colour");
-    //we could do this
+    //colour buttons
     red = new QPushButton("Red", this);
     blue = new QPushButton("Blue", this);
     green = new QPushButton("Green", this);
     purple = new QPushButton("Purple", this);
-    //then we create a lable for the colours
     colourLabel = new QLabel("Solid Colours: ", this);
-    //for example
-    //creating a horizontal widget to store all the possible colours
-    //this actually might be better as a vertical layout idk tho
     colourButtons = new QHBoxLayout;
     colourButtons->addWidget(colourLabel);
     colourButtons->addWidget(red);
@@ -98,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
     colourButtons->addWidget(green);
     colourButtons->addWidget(purple);
 
-    //creating the main widet box to add the above on the one widget as the controller
+    //creating the main widget box to add the above on the one widget as the controller
     controller = new QVBoxLayout;
     controller->addWidget(controllerLabel);
     controller->addWidget(current);
@@ -116,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
     //the central widget is going to be the widget in which contains the controller layout
     setCentralWidget(theWholeController);
 
-    //again, this could change depending on how we want to do the solid colour
+    //connect buttons to their respective event listeners
     connect(breathB, &QPushButton::released, this, &MainWindow::breathButton);
     connect(trafficB, &QPushButton::released, this, &MainWindow::trafficButton);
     connect(flashB, &QPushButton::released, this, &MainWindow::flashButton);
@@ -135,12 +142,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(save, &QPushButton::released, this, &MainWindow::saveB);
     connect(load, &QPushButton::released, this, &MainWindow::loadB);
 
+    connect(onoff, &QPushButton::released, this, &MainWindow::onOffB);
+
     connect(brightness, &QSlider::valueChanged, this, &MainWindow::adjustBrightness);
 }
 
 void MainWindow::refreshCurrentSel()
 {
     std::string s = "";
+    //iterate through currentSel and build display text
     for (int i = 0; i < 3; i++)
     {
         s += currentSel[i];
@@ -198,14 +208,15 @@ void MainWindow::useCurrentSel()
 }
 void MainWindow::saveB()
 {
-    slFlag = 0;
+    slFlag = 0; //set flag
 }
 void MainWindow::loadB()
 {
-    slFlag = 1;
+    slFlag = 1; //set flag
 }
 void MainWindow::breathButton()
 {
+    //update current sel
     QString temp = breathB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
@@ -214,6 +225,7 @@ void MainWindow::breathButton()
 
 void MainWindow::trafficButton()
 {
+    //update current sel
     QString temp = trafficB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
@@ -222,6 +234,7 @@ void MainWindow::trafficButton()
 
 void MainWindow::flashButton()
 {
+    //update current sel
     QString temp = flashB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
@@ -238,6 +251,7 @@ void MainWindow::musicTrafficButton()
 
 void MainWindow::musicBeatButton()
 {
+    //update current sel
     QString temp = musicbeatB->text();
     std::string buttonText = temp.toStdString();
     currentSel[2] = buttonText;
@@ -253,6 +267,7 @@ void MainWindow::redB()
 }
 void MainWindow::blueB()
 {
+    //update current sel
     QString temp = blue->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
@@ -260,6 +275,7 @@ void MainWindow::blueB()
 }
 void MainWindow::greenB()
 {
+    //update current sel
     QString temp = green->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
@@ -267,12 +283,14 @@ void MainWindow::greenB()
 }
 void MainWindow::purpleB()
 {
+    //update current sel
     QString temp = purple->text();
     std::string buttonText = temp.toStdString();
     currentSel[1] = buttonText;
     refreshCurrentSel();
 }
-//for load: getline and store in array/vector and then access the data structure
+
+//checks if load or save, if save then write currentSel, if load then read from respective text file
 void MainWindow::s1B()
 {
     if (slFlag == 0)
@@ -303,6 +321,8 @@ void MainWindow::s1B()
         useCurrentSel();
     }
 }
+
+//checks if load or save, if save then write currentSel, if load then read from respective text file
 void MainWindow::s2B()
 {
     if (slFlag == 0)
@@ -333,6 +353,8 @@ void MainWindow::s2B()
         useCurrentSel();
     }
 }
+
+//checks if load or save, if save then write currentSel, if load then read from respective text file
 void MainWindow::s3B()
 {
     if (slFlag == 0)
@@ -363,8 +385,10 @@ void MainWindow::s3B()
         useCurrentSel();
     }
 }
+
 void MainWindow::adjustBrightness()
 {
+    //update currentSel
     int brightVal = brightness->value();
     std::string s = std::to_string(brightVal);
     currentSel[0] = s;
@@ -373,6 +397,7 @@ void MainWindow::adjustBrightness()
 
 void MainWindow::onOffB()
 {
+    //update on off flag
     if (onOffFlag == 1)
     {
         onOffFlag = 0;
